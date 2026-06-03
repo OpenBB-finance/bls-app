@@ -1,0 +1,32 @@
+# VCS / editor
+.git
+.gitignore
+.vscode
+.DS_Store
+**/.DS_Store
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+**/__pycache__/
+*.py[cod]
+
+# Tooling caches / lockfiles (image installs from PyPI)
+uv.lock
+.ruff_cache/
+.pytest_cache/
+.benchmarks/
+.coverage
+.coverage.*
+.coveragerc
+.claude/
+.vscode/
+
+# Tests are not needed in the runtime image
+tests/
+integration/
+
+# Docker
+Dockerfile
+.dockerignore

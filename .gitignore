@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Virtual envs
+.venv/
+venv/
+env/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.benchmarks/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# IDE
+.claude/
+.vscode/
+
+# Project-specific
+bls/openbb_bls/assets/bls_cache.zip

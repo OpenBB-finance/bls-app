@@ -1,0 +1,12 @@
+services:
+  bls-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: openbb-bls:2.0.0
+    container_name: openbb-bls
+    ports:
+      - "6969:6969"
+    environment:
+      OPENBB_BLS_CACHE_TTL: "21600"
+    restart: unless-stopped
