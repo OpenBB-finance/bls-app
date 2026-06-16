@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     image: openbb-bls:2.0.0
     ports:
-      - "6969:6969"
+      - "${PORT:-6969}:6969"
     environment:
       OPENBB_BLS_CACHE_TTL: "21600"
     restart: unless-stopped

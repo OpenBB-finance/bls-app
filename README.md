@@ -1,4 +1,4 @@
-## BLS Workspace App
+# BLS Workspace App
 
 This repository contains a modified version of `openbb-bls` package. It serves data exclusively from relatively small XLSX spreadsheets and lists of PDF documents. There is no database to build or complex caching system, it relies on simple TTL.
 
