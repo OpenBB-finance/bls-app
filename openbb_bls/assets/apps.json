@@ -2970,7 +2970,7 @@
                             },
                             "chartView": {
                                 "chartType": "line",
-                                "enabled": false
+                                "enabled": true
                             },
                             "columnState": {
                                 "default": {
@@ -3032,7 +3032,7 @@
                             },
                             "chartView": {
                                 "chartType": "line",
-                                "enabled": false
+                                "enabled": true
                             },
                             "columnState": {
                                 "default": {
@@ -3094,7 +3094,7 @@
                             },
                             "chartView": {
                                 "chartType": "line",
-                                "enabled": false
+                                "enabled": true
                             },
                             "columnState": {
                                 "default": {
@@ -3160,7 +3160,7 @@
                             },
                             "chartView": {
                                 "chartType": "line",
-                                "enabled": false
+                                "enabled": true
                             },
                             "columnState": {
                                 "default": {
@@ -3223,7 +3223,7 @@
                             },
                             "chartView": {
                                 "chartType": "line",
-                                "enabled": false
+                                "enabled": true
                             },
                             "columnState": {
                                 "default": {
@@ -3284,7 +3284,7 @@
                             },
                             "chartView": {
                                 "chartType": "line",
-                                "enabled": false
+                                "enabled": true
                             },
                             "columnState": {
                                 "default": {
