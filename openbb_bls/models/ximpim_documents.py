@@ -17,14 +17,6 @@ from openbb_bls.utils.ximpim_archive import current_release, scrape_archive
 
 XimpimDocumentCategory = Literal["all", "current", "archived"]
 
-_API_PREFIX = (
-    SystemService()
-    .system_settings.python_settings.model_dump()
-    .get("api_settings", {})
-    .get("prefix", "")
-    or "/api/v1"
-)
-
 
 class BlsXimpimDocumentsQueryParams(QueryParams):
     """BLS U.S. Import and Export Price Indexes Documents Query Parameters."""
@@ -69,12 +61,12 @@ class BlsXimpimDocumentsData(Data):
                 ),
                 "$.gridData": {"w": 30, "h": 27},
                 "$.refetchInterval": False,
-                "$.endpoint": f"{_API_PREFIX}/bls/import_export/document_download",
+                "$.endpoint": "import_export/document_download",
                 "$.params": [
                     {
                         "type": "endpoint",
                         "paramName": "url",
-                        "optionsEndpoint": f"{_API_PREFIX}/bls/import_export/document_choices",
+                        "optionsEndpoint": "import_export/document_choices",
                         "optionsParams": {
                             "category": "$category",
                             "start_date": "$start_date",

@@ -5,6 +5,7 @@ from __future__ import annotations
 from datetime import date as dateType
 from typing import Any, Literal
 
+from openbb_core.app.service.system_service import SystemService
 from openbb_core.provider.abstract.data import Data
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.abstract.query_params import QueryParams
@@ -15,9 +16,6 @@ from pydantic import ConfigDict, Field
 from openbb_bls.utils.productivity_tables import (
     _DATASET_FILE,
     _DATASET_LABELS,
-    PRODUCTIVITY_MEASURES,
-    PRODUCTIVITY_SECTORS,
-    PRODUCTIVITY_UNITS,
     fetch_xlsx,
     parse_dataset,
 )
@@ -28,6 +26,196 @@ ProductivityDataset = Literal[
     "major-sectors-business-cycles",
     "total-economy-hours-employment",
 ]
+
+_DATASET_DEFAULT_FILTERS: dict[str, dict[str, str | None]] = {
+    "major-sectors-quarterly": {
+        "sector": "Nonfarm business sector",
+        "measure": "Labor productivity",
+        "units": "Index (2017=100)",
+    },
+    "major-sectors-annual": {
+        "sector": "Nonfarm business sector",
+        "measure": "Labor productivity",
+        "units": "Index (2017=100)",
+    },
+    "major-sectors-business-cycles": {
+        "sector": "Nonfarm business sector",
+        "measure": "Labor productivity",
+        "units": "Compound annual growth rate",
+    },
+    "total-economy-hours-employment": {
+        "sector": "Total economy",
+        "measure": "Hours worked",
+        "units": "Billions of hours",
+    },
+}
+
+_DATASET_FILTER_OPTIONS: dict[str, dict[str, tuple[str, ...]]] = {
+    "major-sectors-quarterly": {
+        "sector": (
+            "Nonfarm business sector",
+            "Business sector",
+            "Nonfinancial corporate sector",
+            "Manufacturing sector",
+            "Durable manufacturing sector",
+            "Nondurable manufacturing sector",
+        ),
+        "measure": (
+            "Labor productivity",
+            "Output per worker",
+            "Sectoral output",
+            "Real sectoral output",
+            "Value-added output",
+            "Real value-added output",
+            "Hours worked",
+            "Employment",
+            "Average weekly hours",
+            "Labor compensation",
+            "Hourly compensation",
+            "Real hourly compensation",
+            "Unit labor costs",
+            "Unit nonlabor costs",
+            "Unit nonlabor payments",
+            "Unit combined input costs",
+            "Unit profits",
+            "Nonlabor costs",
+            "Nonlabor payments",
+            "Labor share",
+            "Profits",
+            "Consumer price deflator",
+            "Sectoral output price deflator",
+            "Value-added output price deflator",
+        ),
+        "units": (
+            "Index (2017=100)",
+            "% Change from previous quarter",
+            "% Change from previous year",
+            "% Change same quarter 1 year ago",
+            "Billions of current dollars",
+            "Billions of hours",
+            "Millions of jobs",
+            "Current dollars per hour worked",
+            "CPI-adjusted dollars per hour worked",
+            "Hours worked per job per week",
+            "Percentage",
+        ),
+    },
+    "major-sectors-annual": {
+        "sector": (
+            "Nonfarm business sector",
+            "Business sector",
+            "Nonfinancial corporate sector",
+            "Manufacturing sector",
+            "Durable manufacturing sector",
+            "Nondurable manufacturing sector",
+        ),
+        "measure": (
+            "Labor productivity",
+            "Output per worker",
+            "Sectoral output",
+            "Real sectoral output",
+            "Value-added output",
+            "Real value-added output",
+            "Hours worked",
+            "Employment",
+            "Average weekly hours",
+            "Labor compensation",
+            "Hourly compensation",
+            "Real hourly compensation",
+            "Unit labor costs",
+            "Unit nonlabor costs",
+            "Unit nonlabor payments",
+            "Unit combined input costs",
+            "Unit profits",
+            "Nonlabor costs",
+            "Nonlabor payments",
+            "Labor share",
+            "Profits",
+            "Consumer price deflator",
+            "Sectoral output price deflator",
+            "Value-added output price deflator",
+        ),
+        "units": (
+            "Index (2017=100)",
+            "% Change from previous quarter",
+            "% Change from previous year",
+            "% Change same quarter 1 year ago",
+            "Billions of current dollars",
+            "Billions of hours",
+            "Millions of jobs",
+            "Current dollars per hour worked",
+            "CPI-adjusted dollars per hour worked",
+            "Hours worked per job per week",
+            "Percentage",
+        ),
+    },
+    "major-sectors-business-cycles": {
+        "sector": (
+            "Nonfarm business sector",
+            "Business sector",
+            "Nonfinancial corporate sector",
+            "Manufacturing sector",
+            "Durable manufacturing sector",
+            "Nondurable manufacturing sector",
+        ),
+        "measure": (
+            "Labor productivity",
+            "Output per worker",
+            "Sectoral output",
+            "Real sectoral output",
+            "Value-added output",
+            "Real value-added output",
+            "Hours worked",
+            "Employment",
+            "Average weekly hours",
+            "Labor compensation",
+            "Hourly compensation",
+            "Real hourly compensation",
+            "Unit labor costs",
+            "Unit nonlabor costs",
+            "Unit nonlabor payments",
+            "Unit combined input costs",
+            "Unit profits",
+            "Nonlabor costs",
+            "Nonlabor payments",
+            "Labor share",
+            "Profits",
+            "Consumer price deflator",
+            "Sectoral output price deflator",
+            "Value-added output price deflator",
+        ),
+        "units": ("Compound annual growth rate",),
+    },
+    "total-economy-hours-employment": {
+        "sector": ("Total economy",),
+        "measure": (
+            "Hours worked",
+            "Employment",
+            "Average weekly hours",
+            "Labor productivity",
+            "Output per worker",
+            "Value-added output",
+            "Real value-added output",
+            "Labor compensation",
+            "Hourly compensation",
+            "Real hourly compensation",
+            "Unit labor costs",
+        ),
+        "units": (
+            "Billions of hours",
+            "Millions of jobs",
+            "Hours worked per job per week",
+            "Index",
+            "% Change from previous quarter",
+            "% Change from previous year",
+            "Billions of current dollars",
+            "Current dollars per hour worked",
+            "CPI-adjusted dollars per hour worked",
+            "Index (2017=100)",
+        ),
+    },
+}
+
 
 _HIDE: dict[str, Any] = {"x-widget_config": {"hide": True}}
 # Chart roles for the AgGrid table-to-chart view: a numeric ``value`` series
@@ -55,19 +243,37 @@ class BlsProductivityTablesQueryParams(QueryParams):
         },
         "sector": {
             "x-widget_config": {
-                "options": [{"label": v, "value": v} for v in PRODUCTIVITY_SECTORS],
+                "type": "endpoint",
+                "optionsEndpoint": "table_choices",
+                "optionsParams": {
+                    "dataset": "$dataset",
+                    "parameter": "sector",
+                },
                 "style": {"popupWidth": 350},
             }
         },
         "measure": {
             "x-widget_config": {
-                "options": [{"label": v, "value": v} for v in PRODUCTIVITY_MEASURES],
+                "type": "endpoint",
+                "optionsEndpoint": "table_choices",
+                "optionsParams": {
+                    "dataset": "$dataset",
+                    "parameter": "measure",
+                    "sector": "$sector",
+                },
                 "style": {"popupWidth": 350},
             }
         },
         "units": {
             "x-widget_config": {
-                "options": [{"label": v, "value": v} for v in PRODUCTIVITY_UNITS],
+                "type": "endpoint",
+                "optionsEndpoint": "table_choices",
+                "optionsParams": {
+                    "dataset": "$dataset",
+                    "parameter": "units",
+                    "sector": "$sector",
+                    "measure": "$measure",
+                },
                 "style": {"popupWidth": 350},
             }
         },
@@ -86,17 +292,17 @@ class BlsProductivityTablesQueryParams(QueryParams):
         description=QUERY_DESCRIPTIONS["end_date"],
     )
     sector: str | None = Field(
-        default="Nonfarm business sector",
+        default=None,
         description="Sector to restrict the results. Defaults to the headline"
         " Nonfarm business sector; clear it to load every sector.",
     )
     measure: str | None = Field(
-        default="Labor productivity",
+        default=None,
         description="Measure to restrict the results. Defaults to Labor"
         " productivity; clear it to load every measure.",
     )
     units: str | None = Field(
-        default="Index (2017=100)",
+        default=None,
         description="Units to restrict the results. Defaults to the 2017=100"
         " index (one row per period); clear it to load every units basis. The"
         " source is long-form, so leaving every dimension open returns one row"
@@ -122,9 +328,6 @@ class BlsProductivityTablesData(Data):
                 "$.source": ["BLS"],
                 "$.category": "Economy",
                 "$.subCategory": "Productivity",
-                # Table renders first; the chart is an opt-in toggle that plots
-                # the value series over the time axis. Filter with the dropdowns
-                # to isolate a single series (or group by a category column).
                 "table": {
                     "showAll": True,
                     "enableCharts": True,
@@ -235,7 +438,23 @@ class BlsProductivityTablesFetcher(
         params: dict[str, Any],
     ) -> BlsProductivityTablesQueryParams:
         """Validate and coerce the query."""
-        return BlsProductivityTablesQueryParams(**params)
+        query = BlsProductivityTablesQueryParams(**params)
+        defaults = _DATASET_DEFAULT_FILTERS.get(query.dataset, {})
+        if "sector" not in params:
+            query.sector = defaults.get("sector")
+        if "measure" not in params:
+            query.measure = defaults.get("measure")
+        if "units" not in params:
+            query.units = defaults.get("units")
+
+        allowed = _DATASET_FILTER_OPTIONS.get(query.dataset, {})
+        for key in ("sector", "measure", "units"):
+            value = getattr(query, key)
+            if value is None:
+                continue
+            if value not in set(allowed.get(key, ())):
+                setattr(query, key, defaults.get(key))
+        return query
 
     @staticmethod
     def extract_data(

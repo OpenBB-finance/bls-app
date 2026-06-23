@@ -18,10 +18,14 @@ MAX_AGE = int(os.environ.get("OPENBB_BLS_CACHE_TTL", "21600"))  # default 6 hour
 STATIC_DIR = Path(__file__).parent / "openbb_bls" / "assets" / "static"
 PUBLIC_STATIC_FILES = {
     "openbb-logo.png": ("openbb-logo.png", "image/png"),
-    "bls-empsit-3.png": ("bls-empsit-3.png", "image/png"),
-    "bls-empsit-4.png": ("bls-empsit-4.png", "image/png"),
+    "bls-cpi-1.png": ("bls-cpi-1.png", "image/png"),
+    "bls-cpi-2.png": ("bls-cpi-2.png", "image/png"),
+    "bls-empsit-1.png": ("bls-empsit-1.png", "image/png"),
+    "bls-empsit-2.png": ("bls-empsit-2.png", "image/png"),
+    "bls-ppi-1.png": ("bls-ppi-1.png", "image/png"),
     "bls-ppi-2.png": ("bls-ppi-2.png", "image/png"),
     "bls-productivity-1.png": ("bls-productivity-1.png", "image/png"),
+    "bls-productivity-2.png": ("bls-productivity-2.png", "image/png"),
 }
 
 
@@ -33,6 +37,7 @@ async def add_cache_control(request, call_next):
         request.method == "GET"
         and response.status_code == 200
         and any(request.url.path.startswith(p) for p in CACHE_PATHS)
+        and not str(request.url.path).endswith(".json")
     ):
         response.headers["Cache-Control"] = f"public, max-age={MAX_AGE}"
     return response
@@ -41,7 +46,19 @@ async def add_cache_control(request, call_next):
 class RequireOpenBBUserMiddleware(BaseHTTPMiddleware):
     """Gate the API behind the ``x-openbb-user`` header (with exemptions)."""
 
-    _EXEMPT_PATHS = {"/health", "/", "/widgets.json", "/apps.json"}
+    _EXEMPT_PATHS = {
+        "/health",
+        "/api/v1/bls/productivity/apps.json",
+        "/api/v1/bls/productivity/widgets.json",
+        "/api/v1/bls/cpi/apps.json",
+        "/api/v1/bls/cpi/widgets.json",
+        "/api/v1/bls/ppi/apps.json",
+        "/api/v1/bls/ppi/widgets.json",
+        "/api/v1/bls/ces/apps.json",
+        "/api/v1/bls/ces/widgets.json",
+        "/api/v1/bls/employment_situation/apps.json",
+        "/api/v1/bls/employment_situation/widgets.json",
+    }
     _EXEMPT_PREFIXES = ("/static/",)
 
     async def dispatch(self, request: Request, call_next):
@@ -53,9 +70,7 @@ class RequireOpenBBUserMiddleware(BaseHTTPMiddleware):
         ):
             return await call_next(request)
         if not request.headers.get("x-openbb-user"):
-            return JSONResponse(
-                status_code=403, content={"detail": "Missing required header."}
-            )
+            return JSONResponse(status_code=404, content={"detail": "Not found."})
         return await call_next(request)
 
 

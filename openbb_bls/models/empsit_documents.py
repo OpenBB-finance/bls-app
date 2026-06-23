@@ -17,14 +17,6 @@ from openbb_bls.utils.helpers import apply_date_window
 
 EmpsitDocumentCategory = Literal["all", "current", "archived"]
 
-_API_PREFIX = (
-    SystemService()
-    .system_settings.python_settings.model_dump()
-    .get("api_settings", {})
-    .get("prefix", "")
-    or "/api/v1"
-)
-
 
 class BlsEmpsitDocumentsQueryParams(QueryParams):
     """BLS Employment Situation Documents Query Parameters."""
@@ -68,12 +60,12 @@ class BlsEmpsitDocumentsData(Data):
                 ),
                 "$.gridData": {"w": 30, "h": 27},
                 "$.refetchInterval": False,
-                "$.endpoint": f"{_API_PREFIX}/bls/employment_situation/document_download",
+                "$.endpoint": "document_download",
                 "$.params": [
                     {
                         "type": "endpoint",
                         "paramName": "url",
-                        "optionsEndpoint": f"{_API_PREFIX}/bls/employment_situation/document_choices",
+                        "optionsEndpoint": "document_choices",
                         "optionsParams": {
                             "category": "$category",
                             "start_date": "$start_date",

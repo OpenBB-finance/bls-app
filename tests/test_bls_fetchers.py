@@ -1,5 +1,6 @@
 """Test the BLS fetchers."""
 
+import asyncio
 from datetime import date
 
 import pytest
@@ -47,6 +48,7 @@ from openbb_bls.models.ximpim_charts import (
     BlsXimpimImportsByOriginFetcher,
 )
 from openbb_bls.models.ximpim_documents import BlsXimpimDocumentsFetcher
+from openbb_bls.routers.productivity import table_choices
 
 # ---------------------------------------------------------------------------
 # Document-listing fetchers — scrape functions return canned in-memory data
@@ -1063,3 +1065,59 @@ def test_productivity_tables_fetcher(dataset, mock_bls_http, test_credentials):
     }
     result = BlsProductivityTablesFetcher().test(params, test_credentials)
     assert result is None
+
+
+@pytest.mark.parametrize(
+    "dataset",
+    [
+        "major-sectors-quarterly",
+        "major-sectors-annual",
+        "major-sectors-business-cycles",
+        "total-economy-hours-employment",
+    ],
+)
+def test_productivity_tables_fetcher_dataset_defaults(
+    dataset, mock_bls_http, test_credentials
+):
+    result = BlsProductivityTablesFetcher().test({"dataset": dataset}, test_credentials)
+    assert result is None
+
+
+def test_productivity_tables_fetcher_stale_filters_normalized(
+    mock_bls_http, test_credentials
+):
+    params = {
+        "dataset": "total-economy-hours-employment",
+        "sector": "Nonfarm business sector",
+        "measure": "Labor productivity",
+        "units": "Index (2017=100)",
+    }
+    result = BlsProductivityTablesFetcher().test(params, test_credentials)
+    assert result is None
+
+
+def test_productivity_table_choices_endpoint_filters_by_dataset_and_param():
+    sectors = asyncio.run(
+        table_choices(
+            dataset="total-economy-hours-employment",
+            parameter="sector",
+        )
+    )
+    measures = asyncio.run(
+        table_choices(
+            dataset="total-economy-hours-employment",
+            parameter="measure",
+            sector="Total economy",
+        )
+    )
+    units = asyncio.run(
+        table_choices(
+            dataset="total-economy-hours-employment",
+            parameter="units",
+            sector="Total economy",
+            measure="Hours worked",
+        )
+    )
+    assert sectors == [{"label": "Total economy", "value": "Total economy"}]
+    assert any(o["value"] == "Hours worked" for o in measures)
+    assert units == [{"label": "Billions of hours", "value": "Billions of hours"}]

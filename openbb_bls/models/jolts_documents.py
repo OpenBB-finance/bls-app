@@ -22,14 +22,6 @@ JoltsDocumentCategory = Literal[
     "all",
 ]
 
-_API_PREFIX = (
-    SystemService()
-    .system_settings.python_settings.model_dump()
-    .get("api_settings", {})
-    .get("prefix", "")
-    or "/api/v1"
-)
-
 
 class BlsJoltsDocumentsQueryParams(QueryParams):
     """BLS JOLTS Documents Query Parameters."""
@@ -82,12 +74,12 @@ class BlsJoltsDocumentsData(Data):
                 ),
                 "$.gridData": {"w": 30, "h": 27},
                 "$.refetchInterval": False,
-                "$.endpoint": f"{_API_PREFIX}/bls/jolts/document_download",
+                "$.endpoint": "jolts/document_download",
                 "$.params": [
                     {
                         "type": "endpoint",
                         "paramName": "url",
-                        "optionsEndpoint": f"{_API_PREFIX}/bls/jolts/document_choices",
+                        "optionsEndpoint": "jolts/document_choices",
                         "optionsParams": {
                             "category": "$category",
                             "release_code": "$release_code",

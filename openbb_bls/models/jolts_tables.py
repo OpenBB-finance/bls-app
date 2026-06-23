@@ -206,9 +206,7 @@ class BlsJoltsChangeAnalysisFetcher(
         """Download and parse one change-analysis TXT table."""
         scope, table_number = _decode_table(query.table_number)
         scope_map = (
-            _NATIONAL_TABLE_MEASURES
-            if scope == "national"
-            else _STATE_TABLE_MEASURES
+            _NATIONAL_TABLE_MEASURES if scope == "national" else _STATE_TABLE_MEASURES
         )
         if table_number not in scope_map:
             raise OpenBBError(

@@ -21,14 +21,6 @@ from pydantic import ConfigDict, Field
 from openbb_bls.utils.constants import BLS_USER_AGENT
 from openbb_bls.utils.ttl_cache import ttl_cache
 
-_API_PREFIX = (
-    SystemService()
-    .system_settings.python_settings.model_dump()
-    .get("api_settings", {})
-    .get("prefix", "")
-    or "/api/v1"
-)
-
 _DETAILED_REPORT_EARLIEST = dateType(2005, 6, 1)
 
 
@@ -73,12 +65,12 @@ class BlsPpiDocumentsData(Data):
                 "$.description": ("Producer Price Index detailed report PDF archive."),
                 "$.gridData": {"w": 30, "h": 27},
                 "$.refetchInterval": False,
-                "$.endpoint": f"{_API_PREFIX}/bls/ppi/document_download",
+                "$.endpoint": "document_download",
                 "$.params": [
                     {
                         "type": "endpoint",
                         "paramName": "url",
-                        "optionsEndpoint": f"{_API_PREFIX}/bls/ppi/document_choices",
+                        "optionsEndpoint": "document_choices",
                         "optionsParams": {
                             "category": "$category",
                             "year": "$year",

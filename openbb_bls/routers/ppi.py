@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import Body
+from fastapi import Body, FastAPI
 from openbb_core.app.model.abstract.error import OpenBBError
 from openbb_core.app.model.command_context import CommandContext
 from openbb_core.app.model.example import APIEx
@@ -19,7 +19,10 @@ from openbb_bls.models.ppi_charts import ppi_model_name as _ppi_model_name
 from openbb_bls.utils.constants import BLS_USER_AGENT
 from openbb_bls.utils.ppi_charts import CHART_SPECS as _PPI_CHART_SPECS
 
+from .ximpim import router as ximpim_router
+
 router = Router(prefix="/ppi", description="BLS PPI router.")
+router.api_router.include_router(ximpim_router.api_router, prefix="")
 
 
 @router.command(
@@ -214,3 +217,74 @@ for _ppi_key, _ppi_spec in _PPI_CHART_SPECS.items():
         _ppi_key.replace("-", "_"),
         _ppi_spec["label"],
     )
+
+PPI_APPS = []
+
+
+def get_ppi_apps_json() -> list:
+    """Return a JSON representation of the PPI router's apps."""
+    import json
+    from pathlib import Path
+
+    global PPI_APPS
+
+    if PPI_APPS:
+        return PPI_APPS
+
+    assets_path = Path(__file__).parent.parent / "assets" / "apps.json"
+
+    with open(assets_path, "r", encoding="utf-8") as f:
+        apps_json = json.load(f)
+
+    ppi_apps = [
+        app for app in apps_json if app.get("name", "") == "BLS Producer Price Index"
+    ]
+
+    PPI_APPS = ppi_apps
+
+    return PPI_APPS
+
+
+router.api_router.add_api_route(
+    "/apps.json",
+    get_ppi_apps_json,
+    methods=["GET"],
+    include_in_schema=False,
+    response_model=list,
+)
+
+PPI_WIDGETS = {}
+
+
+def get_ppi_widgets_json() -> dict:
+    """Return a JSON representation of the PPI router's widgets."""
+    from openbb_platform_api.utils.widgets import build_json
+
+    global PPI_WIDGETS
+
+    if PPI_WIDGETS:
+        return PPI_WIDGETS
+
+    temp_app = FastAPI()
+    temp_app.include_router(router.api_router, prefix="")
+    openapi_json = temp_app.openapi()
+    ppi_widgets = build_json(openapi_json, [])
+    temp_widgets = {}
+    for k, v in ppi_widgets.items():
+        widget_name = "bls_" + k
+        v["widgetId"] = widget_name
+        v["endpoint"] = v.get("endpoint", "").replace("/ppi/", "")
+        temp_widgets[widget_name] = v
+
+    PPI_WIDGETS = temp_widgets
+
+    return PPI_WIDGETS
+
+
+router.api_router.add_api_route(
+    "/widgets.json",
+    get_ppi_widgets_json,
+    methods=["GET"],
+    include_in_schema=False,
+    response_model=dict,
+)

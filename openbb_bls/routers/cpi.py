@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import Body
+from fastapi import Body, FastAPI
 from openbb_core.app.model.abstract.error import OpenBBError
 from openbb_core.app.model.command_context import CommandContext
 from openbb_core.app.model.example import APIEx
@@ -19,7 +19,10 @@ from openbb_bls.models.cpi_charts import cpi_model_name as _cpi_model_name
 from openbb_bls.utils.constants import BLS_USER_AGENT
 from openbb_bls.utils.cpi_charts import CHART_SPECS as _CPI_CHART_SPECS
 
+from .realer import router as realer_router
+
 router = Router(prefix="/cpi", description="BLS CPI router.")
+router.api_router.include_router(realer_router.api_router, prefix="")
 
 
 @router.command(
@@ -370,3 +373,75 @@ for _cpi_key, _cpi_spec in _CPI_CHART_SPECS.items():
         _cpi_key.replace("-", "_"),
         _cpi_spec["label"],
     )
+
+
+CPI_APPS = []
+
+
+def get_cpi_apps_json() -> list:
+    """Return a JSON representation of the CPI router's apps."""
+    import json
+    from pathlib import Path
+
+    global CPI_APPS
+
+    if CPI_APPS:
+        return CPI_APPS
+
+    assets_path = Path(__file__).parent.parent / "assets" / "apps.json"
+
+    with open(assets_path, "r", encoding="utf-8") as f:
+        apps_json = json.load(f)
+
+    cpi_apps = [
+        app for app in apps_json if app.get("name", "") == "BLS Consumer Price Index"
+    ]
+
+    CPI_APPS = cpi_apps
+
+    return CPI_APPS
+
+
+router.api_router.add_api_route(
+    "/apps.json",
+    get_cpi_apps_json,
+    methods=["GET"],
+    include_in_schema=False,
+    response_model=list,
+)
+
+CPI_WIDGETS = {}
+
+
+def get_cpi_widgets_json() -> dict:
+    """Return a JSON representation of the CPI router's widgets."""
+    from openbb_platform_api.utils.widgets import build_json
+
+    global CPI_WIDGETS
+
+    if CPI_WIDGETS:
+        return CPI_WIDGETS
+
+    temp_app = FastAPI()
+    temp_app.include_router(router.api_router, prefix="")
+    openapi_json = temp_app.openapi()
+    cpi_widgets = build_json(openapi_json, [])
+    temp_widgets = {}
+    for k, v in cpi_widgets.items():
+        widget_name = "bls_" + k
+        v["widgetId"] = widget_name
+        v["endpoint"] = v.get("endpoint", "").replace("/cpi/", "")
+        temp_widgets[widget_name] = v
+
+    CPI_WIDGETS = temp_widgets
+
+    return CPI_WIDGETS
+
+
+router.api_router.add_api_route(
+    "/widgets.json",
+    get_cpi_widgets_json,
+    methods=["GET"],
+    include_in_schema=False,
+    response_model=dict,
+)

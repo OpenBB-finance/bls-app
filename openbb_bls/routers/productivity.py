@@ -2,7 +2,7 @@
 
 from typing import Annotated
 
-from fastapi import Body
+from fastapi import Body, FastAPI
 from openbb_core.app.model.abstract.error import OpenBBError
 from openbb_core.app.model.command_context import CommandContext
 from openbb_core.app.model.example import APIEx
@@ -32,10 +32,21 @@ from openbb_bls.utils.mining_manufacturing_charts import (
 from openbb_bls.utils.productivity_charts import (
     CHART_SPECS as _PRODUCTIVITY_CHART_SPECS,
 )
+from openbb_bls.utils.productivity_tables import (
+    _DATASET_FILE,
+    fetch_xlsx,
+    parse_dataset,
+)
 from openbb_bls.utils.tfp_charts import CHART_SPECS as _TFP_CHART_SPECS
 from openbb_bls.utils.wholesale_retail_charts import CHART_SPECS as _WR_CHART_SPECS
 
 router = Router(prefix="/productivity", description="BLS Productivity router.")
+
+
+@router.api_router.api_route("/", include_in_schema=False, methods=["*"])
+async def productivity_root() -> dict:
+    """Return a simple message for the root of the Productivity router."""
+    return {"message": "BLS Productivity App."}
 
 
 @router.command(
@@ -186,6 +197,53 @@ async def document_download(params: Annotated[dict, Body()]) -> list:
     return results
 
 
+@router.api_router.get("/table_choices", include_in_schema=False)
+async def table_choices(
+    dataset: str = "major-sectors-quarterly",
+    parameter: str = "sector",
+    sector: str | None = None,
+    measure: str | None = None,
+) -> list[dict[str, str]]:
+    """Get dependent dropdown options for the BLS Productivity tables route."""
+    if dataset not in _DATASET_FILE:
+        raise OpenBBError(f"Unsupported dataset: {dataset}")
+    if parameter not in {"sector", "measure", "units"}:
+        raise OpenBBError(f"Unsupported parameter: {parameter}")
+
+    filename, _ = _DATASET_FILE[dataset]
+    rows = [
+        r
+        for r in parse_dataset(fetch_xlsx(filename), dataset)
+        if r.get("units") != "Level - not available"
+    ]
+
+    if sector:
+        sector_filter = sector.strip().lower()
+        rows = [
+            r for r in rows if (r.get("sector") or "").strip().lower() == sector_filter
+        ]
+
+    if parameter == "units" and measure:
+        measure_filter = measure.strip().lower()
+        rows = [
+            r
+            for r in rows
+            if (r.get("measure") or "").strip().lower() == measure_filter
+        ]
+
+    target_key = parameter
+    seen: set[str] = set()
+    options: list[dict[str, str]] = []
+    for row in rows:
+        value = (row.get(target_key) or "").strip()
+        if not value or value in seen:
+            continue
+        seen.add(value)
+        options.append({"label": value, "value": value})
+
+    return options
+
+
 def _register_productivity_chart_route(
     model_name: str, func_name: str, label: str
 ) -> None:
@@ -226,3 +284,76 @@ for _specs, _name_fn in (
             _key.replace("-", "_"),
             _spec["label"],
         )
+
+
+PRODUCTIVITY_APPS = []
+
+
+def get_productivity_apps_json() -> list:
+    """Return a JSON representation of the Productivity router's apps."""
+    import json
+    from pathlib import Path
+
+    global PRODUCTIVITY_APPS
+
+    if PRODUCTIVITY_APPS:
+        return PRODUCTIVITY_APPS
+
+    assets_path = Path(__file__).parent.parent / "assets" / "apps.json"
+
+    with open(assets_path, "r", encoding="utf-8") as f:
+        apps_json = json.load(f)
+
+    productivity_apps = [
+        app for app in apps_json if app.get("name", "") == "BLS Productivity & Costs"
+    ]
+
+    PRODUCTIVITY_APPS = productivity_apps
+
+    return PRODUCTIVITY_APPS
+
+
+router.api_router.add_api_route(
+    "/apps.json",
+    get_productivity_apps_json,
+    methods=["GET"],
+    include_in_schema=False,
+    response_model=list,
+)
+
+PRODUCTIVITY_WIDGETS = {}
+
+
+def get_productivity_widgets_json() -> dict:
+    """Return a JSON representation of the Productivity router's widgets."""
+    from openbb_platform_api.utils.widgets import build_json
+
+    global PRODUCTIVITY_WIDGETS
+
+    if PRODUCTIVITY_WIDGETS:
+        return PRODUCTIVITY_WIDGETS
+
+    temp_app = FastAPI()
+    temp_app.include_router(router.api_router, prefix="")
+
+    openapi_json = temp_app.openapi()
+    productivity_widgets = build_json(openapi_json, [])
+    temp_widgets = {}
+    for k, v in productivity_widgets.items():
+        widget_name = "bls_" + k
+        v["widgetId"] = widget_name
+        temp_widgets[widget_name] = v
+        v["endpoint"] = v.get("endpoint", "").replace("/productivity/", "")
+
+    PRODUCTIVITY_WIDGETS = temp_widgets
+
+    return PRODUCTIVITY_WIDGETS
+
+
+router.api_router.add_api_route(
+    "/widgets.json",
+    get_productivity_widgets_json,
+    methods=["GET"],
+    include_in_schema=False,
+    response_model=dict,
+)

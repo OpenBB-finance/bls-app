@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import date as dateType
 from typing import Any, Literal
 
-from openbb_core.app.service.system_service import SystemService
 from openbb_core.provider.abstract.data import Data
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.abstract.query_params import QueryParams
@@ -16,14 +15,6 @@ from openbb_bls.utils.helpers import apply_date_window
 from openbb_bls.utils.realer_archive import current_release, scrape_archive
 
 RealerDocumentCategory = Literal["all", "current", "archived"]
-
-_API_PREFIX = (
-    SystemService()
-    .system_settings.python_settings.model_dump()
-    .get("api_settings", {})
-    .get("prefix", "")
-    or "/api/v1"
-)
 
 
 class BlsRealerDocumentsQueryParams(QueryParams):
@@ -68,12 +59,12 @@ class BlsRealerDocumentsData(Data):
                 ),
                 "$.gridData": {"w": 30, "h": 27},
                 "$.refetchInterval": False,
-                "$.endpoint": f"{_API_PREFIX}/bls/real_earnings/document_download",
+                "$.endpoint": "real_earnings/document_download",
                 "$.params": [
                     {
                         "type": "endpoint",
                         "paramName": "url",
-                        "optionsEndpoint": f"{_API_PREFIX}/bls/real_earnings/document_choices",
+                        "optionsEndpoint": "real_earnings/document_choices",
                         "optionsParams": {
                             "category": "$category",
                             "start_date": "$start_date",

@@ -5,7 +5,6 @@ from __future__ import annotations
 from datetime import date as dateType
 from typing import Any, Literal
 
-from openbb_core.app.service.system_service import SystemService
 from openbb_core.provider.abstract.data import Data
 from openbb_core.provider.abstract.fetcher import Fetcher
 from openbb_core.provider.abstract.query_params import QueryParams
@@ -24,14 +23,6 @@ ProductivityDocumentCategory = Literal[
     "archived",
     "all",
 ]
-
-_API_PREFIX = (
-    SystemService()
-    .system_settings.python_settings.model_dump()
-    .get("api_settings", {})
-    .get("prefix", "")
-    or "/api/v1"
-)
 
 
 class BlsProductivityDocumentsQueryParams(QueryParams):
@@ -91,12 +82,12 @@ class BlsProductivityDocumentsData(Data):
                 ),
                 "$.gridData": {"w": 40, "h": 27},
                 "$.refetchInterval": False,
-                "$.endpoint": f"{_API_PREFIX}/bls/productivity/document_download",
+                "$.endpoint": "document_download",
                 "$.params": [
                     {
                         "type": "endpoint",
                         "paramName": "url",
-                        "optionsEndpoint": f"{_API_PREFIX}/bls/productivity/document_choices",
+                        "optionsEndpoint": "document_choices",
                         "optionsParams": {
                             "category": "$category",
                             "release_code": "$release_code",

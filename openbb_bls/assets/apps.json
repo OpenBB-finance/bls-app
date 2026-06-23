@@ -1103,7 +1103,7 @@
                 "name": "JOLTS",
                 "layout": [
                     {
-                        "i": "bls_jolts_documents_bls_obb",
+                        "i": "bls_employment_situation_jolts_documents_bls_obb",
                         "x": 0,
                         "y": 2,
                         "w": 40,
@@ -1118,7 +1118,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_revisions_bls_obb",
+                        "i": "bls_employment_situation_jolts_revisions_bls_obb",
                         "x": 0,
                         "y": 29,
                         "w": 40,
@@ -1175,7 +1175,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_change_analysis_bls_obb",
+                        "i": "bls_employment_situation_jolts_change_analysis_bls_obb",
                         "x": 0,
                         "y": 53,
                         "w": 40,
@@ -1231,7 +1231,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_unemp_per_opening_bls_obb",
+                        "i": "bls_employment_situation_jolts_unemp_per_opening_bls_obb",
                         "x": 0,
                         "y": 76,
                         "w": 40,
@@ -1257,7 +1257,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_openings_hires_seps_levels_bls_obb",
+                        "i": "bls_employment_situation_jolts_openings_hires_seps_levels_bls_obb",
                         "x": 0,
                         "y": 96,
                         "w": 40,
@@ -1285,7 +1285,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_openings_hires_seps_rates_bls_obb",
+                        "i": "bls_employment_situation_jolts_openings_hires_seps_rates_bls_obb",
                         "x": 0,
                         "y": 116,
                         "w": 40,
@@ -1313,7 +1313,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_hires_seps_rates_bls_obb",
+                        "i": "bls_employment_situation_jolts_hires_seps_rates_bls_obb",
                         "x": 0,
                         "y": 136,
                         "w": 40,
@@ -1341,7 +1341,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_openings_by_industry_bls_obb",
+                        "i": "bls_employment_situation_jolts_openings_by_industry_bls_obb",
                         "x": 0,
                         "y": 156,
                         "w": 40,
@@ -1400,7 +1400,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_openings_hires_seps_by_region_bls_obb",
+                        "i": "bls_employment_situation_jolts_openings_hires_seps_by_region_bls_obb",
                         "x": 0,
                         "y": 176,
                         "w": 40,
@@ -1454,7 +1454,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_jolts_beveridge_curve_bls_obb",
+                        "i": "bls_employment_situation_jolts_beveridge_curve_bls_obb",
                         "x": 0,
                         "y": 196,
                         "w": 40,
@@ -1570,7 +1570,9 @@
                                 }
                             }
                         },
-                        "groups": []
+                        "groups": [
+                            "date"
+                        ]
                     },
                     {
                         "i": "bls_cpi_t2_detailed_expenditure_bls_obb",
@@ -1621,7 +1623,9 @@
                                 }
                             }
                         },
-                        "groups": []
+                        "groups": [
+                            "date"
+                        ]
                     },
                     {
                         "i": "bls_cpi_t3_special_aggregates_bls_obb",
@@ -1675,7 +1679,9 @@
                                 }
                             }
                         },
-                        "groups": []
+                        "groups": [
+                            "date"
+                        ]
                     },
                     {
                         "i": "bls_cpi_t4_selected_areas_bls_obb",
@@ -1731,7 +1737,9 @@
                                 }
                             }
                         },
-                        "groups": []
+                        "groups": [
+                            "date"
+                        ]
                     },
                     {
                         "i": "bls_cpi_t5_chained_vs_cpiu_bls_obb",
@@ -1777,7 +1785,9 @@
                                 }
                             }
                         },
-                        "groups": []
+                        "groups": [
+                            "date"
+                        ]
                     },
                     {
                         "i": "bls_cpi_t6_1m_analysis_bls_obb",
@@ -1828,7 +1838,9 @@
                                 }
                             }
                         },
-                        "groups": []
+                        "groups": [
+                            "date"
+                        ]
                     },
                     {
                         "i": "bls_cpi_t7_12m_analysis_bls_obb",
@@ -1879,7 +1891,9 @@
                                 }
                             }
                         },
-                        "groups": []
+                        "groups": [
+                            "date"
+                        ]
                     }
                 ]
             },
@@ -2423,7 +2437,7 @@
                 "name": "Real Earnings",
                 "layout": [
                     {
-                        "i": "bls_real_earnings_documents_bls_obb",
+                        "i": "bls_cpi_real_earnings_documents_bls_obb",
                         "x": 0,
                         "y": 2,
                         "w": 40,
@@ -2930,7 +2944,7 @@
                 "name": "U.S. Import & Export Price Indexes",
                 "layout": [
                     {
-                        "i": "bls_import_export_documents_bls_obb",
+                        "i": "bls_ppi_import_export_documents_bls_obb",
                         "x": 0,
                         "y": 2,
                         "w": 40,
@@ -2945,7 +2959,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_import_export_price_indexes_bls_obb",
+                        "i": "bls_ppi_import_export_price_indexes_bls_obb",
                         "x": 0,
                         "y": 31,
                         "w": 40,
@@ -3007,7 +3021,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_import_export_imports_by_category_bls_obb",
+                        "i": "bls_ppi_import_export_imports_by_category_bls_obb",
                         "x": 0,
                         "y": 51,
                         "w": 40,
@@ -3069,7 +3083,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_import_export_exports_by_category_bls_obb",
+                        "i": "bls_ppi_import_export_exports_by_category_bls_obb",
                         "x": 0,
                         "y": 71,
                         "w": 40,
@@ -3131,7 +3145,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_import_export_imports_by_origin_bls_obb",
+                        "i": "bls_ppi_import_export_imports_by_origin_bls_obb",
                         "x": 0,
                         "y": 91,
                         "w": 40,
@@ -3201,7 +3215,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_import_export_exports_by_grains_bls_obb",
+                        "i": "bls_ppi_import_export_exports_by_grains_bls_obb",
                         "x": 0,
                         "y": 111,
                         "w": 40,
@@ -3257,7 +3271,7 @@
                         "groups": []
                     },
                     {
-                        "i": "bls_import_export_air_passenger_fares_bls_obb",
+                        "i": "bls_ppi_import_export_air_passenger_fares_bls_obb",
                         "x": 0,
                         "y": 131,
                         "w": 40,

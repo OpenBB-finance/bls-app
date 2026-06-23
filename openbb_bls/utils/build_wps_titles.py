@@ -48,9 +48,13 @@ def build_map() -> dict[str, str]:
 def main() -> None:
     """Write the gzipped title map to the assets directory."""
     mapping = build_map()
-    blob = json.dumps(mapping, separators=(",", ":"), ensure_ascii=False).encode("utf-8")
+    blob = json.dumps(mapping, separators=(",", ":"), ensure_ascii=False).encode(
+        "utf-8"
+    )
     _ASSET.write_bytes(gzip.compress(blob, 9))
-    print(f"Wrote {len(mapping)} WPS titles to {_ASSET} ({_ASSET.stat().st_size} bytes)")
+    print(
+        f"Wrote {len(mapping)} WPS titles to {_ASSET} ({_ASSET.stat().st_size} bytes)"
+    )
 
 
 if __name__ == "__main__":
