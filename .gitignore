@@ -31,3 +31,8 @@ coverage.xml
 
 # Project-specific
 bls/openbb_bls/assets/bls_cache.zip
+
+# Environment files
+.env
+.env.*
+!.env.example
